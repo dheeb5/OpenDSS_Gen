@@ -1,6 +1,6 @@
 # OpenDSS_Gen
 
-Agent portable skill suite for EPRI [OpenDSS](https://opendss.epri.com/) distribution system simulation. Ten skills covering the full study lifecycle plus a plan-first orchestrator agent (**DSS-powers**). Works with Claude Code, Codex, and any agent that can read markdown (see [AGENTS.md](AGENTS.md)).
+Agent portable skill suite for [OpenDSS](https://opendss.epri.com/) distribution system simulation. Ten skills covering the full study lifecycle plus a plan-first orchestrator agent (**DSS-powers**). Works with Claude Code, Codex, and any agent that can read markdown (see [AGENTS.md](AGENTS.md)).
 
 Every DSS example embedded in these skills was executed and verified against **dss-python 0.15.7** (DSS C-API 0.14.5, OpenDSS SVN 3723 parity) on Linux.
 
