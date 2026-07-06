@@ -1,0 +1,5 @@
+Redirect feeder.dss
+Set mode=snapshot
+Solve
+Show Voltages LN Nodes
+Export Voltages

@@ -1,0 +1,10 @@
+Clear
+New Circuit.DemoFeeder basekv=12.47 pu=1.0 phases=3 bus1=SourceBus MVAsc3=200 MVAsc1=210
+New Linecode.336ACSR nphases=3 r1=0.058 x1=0.1206 r0=0.1784 x0=0.4047 c1=3.4 c0=1.6 units=kft
+New Line.L1 bus1=SourceBus bus2=MidBus linecode=336ACSR length=6 units=kft
+New Line.L2 bus1=MidBus bus2=LoadBus linecode=336ACSR length=4 units=kft
+New Transformer.T1 phases=3 windings=2 buses=[LoadBus, SecBus] conns=[delta, wye] kvs=[12.47, 0.48] kvas=[1500, 1500] xhl=5.75 %loadloss=1.0
+New Load.Plant phases=3 bus1=SecBus kv=0.48 kw=1200 pf=0.92 model=1
+New Load.Feeder1 phases=3 bus1=MidBus kv=12.47 kw=800 pf=0.95 model=1
+Set voltagebases=[12.47, 0.48]
+CalcVoltageBases

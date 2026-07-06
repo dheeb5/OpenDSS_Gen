@@ -1,0 +1,5 @@
+Redirect feeder.dss
+Solve
+Set mode=faultstudy
+Solve
+Export Faultstudy

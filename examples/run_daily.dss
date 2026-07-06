@@ -1,0 +1,10 @@
+Redirect feeder.dss
+New Loadshape.day24 npts=24 interval=1 mult=[0.4 0.35 0.32 0.3 0.32 0.4 0.55 0.7 0.82 0.9 0.95 1.0 0.98 0.95 0.92 0.9 0.94 1.0 0.98 0.9 0.8 0.65 0.55 0.45]
+Edit Load.Plant daily=day24
+Edit Load.Feeder1 daily=day24
+New EnergyMeter.M1 element=Line.L1 terminal=1
+New Monitor.mon_load element=Load.Plant terminal=1 mode=1 ppolar=no
+Set mode=daily number=24 stepsize=1h
+Solve
+Export Monitors mon_load
+Export Meters

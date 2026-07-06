@@ -1,0 +1,7 @@
+Redirect feeder.dss
+New Generator.G1 bus1=MidBus phases=3 kv=12.47 kw=500 pf=1.0 model=1 H=4 D=0.1 Xdp=0.27
+New Monitor.mon_gen element=Generator.G1 terminal=1 mode=3
+Solve
+Set mode=dynamics number=200 stepsize=0.0002
+Solve
+Export Monitors mon_gen

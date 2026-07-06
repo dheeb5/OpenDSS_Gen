@@ -1,0 +1,8 @@
+Redirect feeder.dss
+New Spectrum.sixpulse numharm=5 harmonic=[1 5 7 11 13] %mag=[100 20 14 9 7] angle=[0 0 0 0 0]
+Edit Load.Plant spectrum=sixpulse
+New Monitor.mon_sec element=Transformer.T1 terminal=2 mode=0
+Solve
+Set mode=harmonics
+Solve
+Export Monitors mon_sec
