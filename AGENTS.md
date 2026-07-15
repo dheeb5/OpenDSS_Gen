@@ -29,6 +29,9 @@ A skill library for EPRI OpenDSS distribution system simulation: environment set
 - Never hand author an OpenDSS-G `.dsp` file; use the tool's Import feature.
 - Validate every DSS snippet by running it (`opendss <file>`) before delivering it.
 - State assumptions for any missing engineering data (source strength, %Z, spectra, profiles).
+- Keep the master model file `Solve`/`Export` free; run every study from a standalone driver that `Redirect`s the master. Confirm the driver points at the current, complete master (projects accumulate stale/parallel masters).
+- Exports are named from the circuit name, so a second study overwrites the first — preserve or rename baselines before variant runs, then restore canonical names.
+- Label any result that rests on placeholder data (assumed source strength, %Z, spectra, dispatch) as a planning estimate to be re-run once real data arrives.
 
 ## Smoke test
 ```bash

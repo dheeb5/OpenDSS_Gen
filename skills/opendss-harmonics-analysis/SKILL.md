@@ -39,9 +39,14 @@ Same formula per phase and for current (TDD uses maximum demand current as the b
 | 69 kV < V <= 161 kV | 1.5% | 2.5% |
 
 ## Modeling Cautions
+- **Every nonlinear/converter element needs a `Spectrum`, or harmonics mode injects nothing.** A PVSystem, Storage, Generator, or Load with no `spectrum=` contributes zero harmonic current, so the solve trivially shows no distortion — a meaningless "clean" result, not a passing one. Assign a spectrum to each and state whether it is vendor emission data or an assumed typical spectrum.
+- **Define spectra before the elements that reference them.** An inline `spectrum=` on a PVSystem/Storage requires that `Spectrum` object to be compiled first (DSS error #401, "Spectrum not found", otherwise). In a split model, redirect `Spectrum.dss` ahead of `PVSystem.dss`/`Storage.dss`.
+- **Inverter injection can amplify well above the assigned %mag.** PVSystem/Storage use a Norton-equivalent current-source harmonic model that interacts with local network impedance at each harmonic; injection-point currents have been observed several times their assigned percentage even with no capacitor/cable resonance present. Report the qualitative finding as actionable, but do not present the raw magnitude as a vendor-verified compliance number without reviewing the element's internal `%R`/`%X` representation.
+- **An idling Storage has ~0 fundamental current, so its computed current-THD is a numerical artifact, not a result.** Define a real dispatch point before quoting its distortion.
 - Keep capacitors and cable capacitance in the model — parallel resonance near a characteristic harmonic is the phenomenon of interest. If a single harmonic is amplified far above its injected percentage, suspect (and report) resonance; sweep with `Set mode=harmonics` plus a frequency scan rather than deleting the capacitor.
 - Vendor emission data is usually a CURRENT spectrum. Applying it as a Vsource voltage spectrum behind a small impedance is an approximation that can wildly overstate harmonic currents; prefer spectrum on the Load/PVSystem/Generator element itself (current injection), and state the method used.
 - Loads participate as harmonic impedances; set `%SeriesRL` if the default parallel R‖L representation is inappropriate.
+- Current TDD/519 Table 4/5 screening needs Isc/IL at each PCC, which requires a fault-duty study; a harmonics run alone cannot assign the correct current-distortion limit.
 
 ## Common Mistakes
 | Mistake | Consequence |
@@ -50,3 +55,6 @@ Same formula per phase and for current (TDD uses maximum demand current as the b
 | Reading THD off a single Export Voltages | That export is per frequency; THD needs all rows from a monitor |
 | Comparing current THD to IEEE 519 tables without TDD basis | 519 current limits are in percent of maximum demand current and depend on Isc/IL |
 | Spectrum angles all zero for diverse sources | Overstates summation; note it as a conservative assumption |
+| No spectrum on PV/Storage/Generator/Load | Zero injection, meaningless "clean" result — assign one and state its basis |
+| Spectrum defined after the element that cites it | Compile error #401 "Spectrum not found"; redirect Spectrum.dss first |
+| Quoting THD off an idling Storage | ~0 fundamental makes the ratio a numerical artifact; set a dispatch point first |

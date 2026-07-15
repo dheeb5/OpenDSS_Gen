@@ -47,6 +47,13 @@ Avoid `Show` and `Plot` in automation: `Show` spawns an editor (harmless GUI err
 7. Look for micro impedance branches and zero length lines; replace with switch lines or reactors.
 8. Isolate controls: `Set controlmode=off` to test whether regulator/cap control hunting is the cause.
 
+## Driver-script pattern (keep the master Solve-free)
+Do not put `Solve`/`Export` in the master model file. Keep one standalone driver per study (snapshot, harmonics, fault, QSTS) that `Redirect`s the master, then solves and exports. This lets the same model serve every study, keeps the model reproducible, and makes each run's intent explicit. Before running any driver, confirm it redirects the current, complete master — projects accumulate stale or parallel masters (for example an old `Master_Part1.dss` alongside a newer `Master.dss`), and redirecting the wrong one silently omits elements.
+
+## Engine limitations seen in the field
+- `Set mode=faultstudy` + `Solve` reproducibly SEGFAULTS on some builds (confirmed on dss-python 0.15.7 / DSS C-API 0.14.5); the prior snapshot solve is unaffected. Fall back to the explicit `Fault` element + snapshot workflow (see opendss-fault-study). Verify with `Export Summary` that the fault solve actually completed before trusting any number.
+- On case-sensitive Linux filesystems, `Redirect LoadShape.DSS` fails against a file named `LoadShape.dss`; match case exactly.
+
 ## Common Mistakes
 | Mistake | Consequence |
 |---|---|
@@ -54,3 +61,6 @@ Avoid `Show` and `Plot` in automation: `Show` spawns an editor (harmless GUI err
 | Looking for outputs next to the caller | Files are written to the active data path (Compile changes it) |
 | Solving harmonics/dynamics without a prior snapshot Solve | Wrong or non initialized operating point |
 | Treating a nonzero exit code as solve failure | Verify via Export Summary; editor spawn also returns nonzero |
+| Running a second study without guarding export names | `<Circuit>_EXP_*.csv` overwrites the prior run silently; preserve/rename baselines, restore canonical names after |
+| Putting Solve/Export in the master file | Cannot reuse the model across studies; use a driver per study that Redirects the master |
+| Redirecting a stale or parallel master | Silently omits split-out elements; confirm the driver points at the current complete master |

@@ -40,6 +40,17 @@ New Storage.B1 phases=3 bus1=LVbus kv=0.48 kWrated=250 kWhrated=500 %stored=50
 | 1 phase, line to line (2 hot terminals) | Line to line kV |
 Bus node syntax: `bus1=BusA.1.2.3` (phases), `.0` grounds a terminal (e.g. wye neutral solidly grounded is default; `bus1=B.1.2.3.4` exposes the neutral node).
 
+## Field-tested modeling conventions
+- **Switches, breakers, ATS, fuses:** model as `Switch=true enabled=true` Line elements with a near-zero length (`length=0.001` kft) on the SAME LineCode as the adjacent conductor. Status can be toggled without re-deriving impedance, and it avoids the conditioning problems of a separate zero-Z linecode.
+- **Bonding/grounding jumpers (SBJ):** document in a comment at each occurrence; do not model as separate branches.
+- **Ampacity and impedance basis:** NEC 310.16 (75 C column) for `normamps`, `emergamps = 1.25 * normamps`; NEC Chapter 9 Table 9 per-conductor R/X divided by the number of parallel conductors per phase for R1/X1. Take R0/X0 conservatively from the single (un-paralleled) conductor values as a planning approximation, and flag it for revision once as-built geometry exists.
+- **Single-phase line-to-line branch:** `phases=1` with explicit `.1.2` node suffixes tapping two phases of the upstream bus, and `kv=` entered as the line-to-line value (the two-hot-terminal convention in the kV table above).
+- **Grid-forming BESS:** use `Storage` (charge/discharge, grid-forming), not `Generator`. Its stiff control impedance is for load flow only; substitute a current-limited impedance for fault studies (see opendss-fault-study).
+- **Zig-zag grounding bank:** model per EPRI's simplified equivalent as a 3-phase Wye-Delta 2-winding Transformer on its own bus (grounding only, no external load), rather than three single-phase units with node tricks.
+- **PV kV must match the transformer secondary it ties to** (e.g., 0.208 vs 0.48). A wrong `kv` here is a silent voltage error that only shows up as an off-by-sqrt(3) pu at solve.
+- **Preserve history:** header-comment superseded elements RETIRED or SUPERSEDED and keep them in the file; never delete.
+- **Keep the master Solve-free:** the model file defines the circuit; run studies from separate drivers that Redirect it (see opendss-simulation-running).
+
 ## Validation Before Handing Off
 1. Compile the file; fix parser errors top down (first error often cascades).
 2. `Solve`, then check convergence and iteration count (`Export Summary` / `Summary`).
@@ -55,3 +66,6 @@ Bus node syntax: `bus1=BusA.1.2.3` (phases), `.0` grounds a terminal (e.g. wye n
 | Duplicate element names | Silent overwrite via implicit edit | Unique names; use `Edit` intentionally |
 | Zero length or micro impedance lines for busbars | Convergence and conditioning issues | Model as `switch=y` line or a small Reactor |
 | Assuming default load model | Unexpected voltage sensitivity | `model=1` constant PQ is default; set explicitly |
+| PV/inverter kv not matching its transformer secondary | pu off by sqrt(3), silent voltage error | Set PVSystem/Storage kv to the actual secondary (0.208 vs 0.48) |
+| Modeling a grid-forming BESS as a Generator | Wrong charge/discharge and fault behavior | Use `Storage`; substitute a current-limited impedance for fault duty |
+| Inventing undrawn topology to "complete" a network | Non-auditable model | Model only what the drawing shows; document the rest in comments |
